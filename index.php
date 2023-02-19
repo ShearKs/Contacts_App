@@ -9,6 +9,7 @@
   //   ];
 
   //Lee todos los contactos
+  //Comentario nuevoclear
     if (file_exists("contacts.json")){
 
       $contacts  = json_decode( file_get_contents("contacts.json"),true); 
