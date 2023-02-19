@@ -10,14 +10,18 @@
 
   //Lee todos los contactos
   //Comentario nuevoclear
-    if (file_exists("contacts.json")){
+    // if (file_exists("contacts.json")){
 
-      $contacts  = json_decode( file_get_contents("contacts.json"),true); 
+    //   $contacts  = json_decode( file_get_contents("contacts.json"),true); 
 
-    }else{
+    // }else{
 
-      $contacts = [];
-    }
+    //   $contacts = [];
+    // }
+
+require "conexion.php";
+//Ahora lee los contactos desde la base de datos
+$contacts = $conn->query("SELECT * FROM contacts");
 
 ?>
 
@@ -81,7 +85,7 @@
     <div class="container pt-4 p-3">
       <div class="row">
 
-      <?php if (count($contacts)  == 0): ?>
+      <?php if ($contacts->rowCount() == 0): ?>
         <div class="col-md-4 mx-auto">
             <div class="card card-body text-center">
               <p>No contacts saved yet</p>
