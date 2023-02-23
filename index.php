@@ -85,6 +85,7 @@ $contacts = $conn->query("SELECT * FROM contacts");
     <div class="container pt-4 p-3">
       <div class="row">
 
+      <!--Si no hay ningun contacto muestra el siguiente div -->
       <?php if ($contacts->rowCount() == 0): ?>
         <div class="col-md-4 mx-auto">
             <div class="card card-body text-center">
@@ -93,6 +94,7 @@ $contacts = $conn->query("SELECT * FROM contacts");
             </div>
           </div>
       <?php endif ?> 
+      <!-- Recorre los contactos que hay en la base de datos-->
       <?php foreach ($contacts as $contact): ?>
           <div class="col-md-4 mb-3">
             <div class="card text-center">
