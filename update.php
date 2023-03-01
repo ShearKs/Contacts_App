@@ -5,7 +5,11 @@
   $id = $_GET["id"];
 
   $statement = $conn->prepare("SELECT * FROM contacts WHERE id = :id LIMIT 1");
-  $statement->execute([":id" => $id]);
+  $statement->bindParam(":id",$id);
+  $statement->execute();
+
+  //Forma breve de hacer lo anterior
+  //$statement->execute([":id" => $id]);
 
   if ($statement->rowCount() == 0) {
     http_response_code(404);
@@ -27,13 +31,20 @@
       $phoneNumber = $_POST["phone_number"];
 
       $statement = $conn->prepare("UPDATE contacts SET name = :name, phone_number = :phone_number WHERE id = :id");
-      $statement->execute([
-        ":id" => $id,
-        ":name" => $_POST["name"],
-        ":phone_number" => $_POST["phone_number"],
-      ]);
+      $statement ->bindParam(":id",$id);
+      $statement ->bindParam(":name",$_POST["name"]);
+      $statement ->bindParam(":phone_number",$_POST["phone_number"]);
 
-      header("Location: index.php");
+      $statement ->execute();
+
+      //Otra forma vas breve de hacerlo
+      // $statement->execute([
+      //   ":id" => $id,
+      //   ":name" => $_POST["name"],
+      //   ":phone_number" => $_POST["phone_number"],
+      // ]);
+
+      header("Location: home.php");
     }
   }
 ?>
@@ -108,12 +119,12 @@
                   <?= $error ?>
                 </p>
               <?php endif ?>
-              <form method="POST" action="update.php?id=<?= $contact['id'] ?>">
+              <form method="POST" action="update.php?id=<?= $contact["id"] ?>">
                 <div class="mb-3 row">
                   <label for="name" class="col-md-4 col-form-label text-md-end">Name</label>
     
                   <div class="col-md-6">
-                    <input value="<?= $contact["name"] ?>" id="name" type="text" class="form-control" name="name" autocomplete="name" autofocus>
+                    <input  id="name" type="text" class="form-control" name="name" value="<?= $contact["name"] ?>" autocomplete="name" autofocus>
                   </div>
                 </div>
     
@@ -121,7 +132,7 @@
                   <label for="phone_number" class="col-md-4 col-form-label text-md-end">Phone Number</label>
     
                   <div class="col-md-6">
-                    <input value="<?= $contact["phone_number"] ?>" id="phone_number" type="tel" class="form-control" name="phone_number" autocomplete="phone_number" autofocus>
+                    <input  id="phone_number" type="tel" class="form-control" name="phone_number" value="<?= $contact["phone_number"] ?>" autocomplete="phone_number" autofocus>
                   </div>
                 </div>
     

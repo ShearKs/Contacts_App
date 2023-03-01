@@ -18,8 +18,8 @@
 
       }else{
 
-        $name = $_POST["name"];
-        $phoneNumber = $_POST["phone_number"];
+      $name = $_POST["name"];
+      $phoneNumber = $_POST["phone_number"];
 
         //statement con inyección sql
        $statement = $conn->prepare("INSERT INTO contacts(name,phone_number) VALUES (:name,:phoneNumber)");
@@ -30,13 +30,12 @@
         $statement ->execute();
 
 
-        header("Location: index.php");
+        header("Location: home.php");
 
       }
   }
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -85,7 +84,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="./index.php">Home</a>
+            <a class="nav-link" href="./home.php">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./add.php">Add Contact</a>
