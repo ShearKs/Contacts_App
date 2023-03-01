@@ -51,6 +51,7 @@ $contacts = $conn->query("SELECT * FROM contacts");
   <title>Contacts App</title>
 </head>
 <body>
+  <!--Añadido de comentario -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand font-weight-bold" href="#">
