@@ -6,50 +6,43 @@ $error = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    if (empty($_POST["name"]) || empty($_POST["email"]) || empty($_POST["password"])  ){
+    if (empty($_POST["name"]) || empty($_POST["email"]) || empty($_POST["password"])) {
 
         $error = "Los campos no pueden estar vacios";
-
-    }else if (!str_contains($_POST["email"],"@")){
+    } else if (!str_contains($_POST["email"], "@")) {
 
         $error = "El correo tiene que ser valido";
-
-    }else{
+    } else {
         $statement = $conn->prepare("SELECT * FROM users WHERE email = :email");
-        $statement ->bindParam(":email",$_POST["email"]);
+        $statement->bindParam(":email", $_POST["email"]);
         $statement->execute();
 
-        if ($statement-> rowCount() > 0){
+        if ($statement->rowCount() > 0) {
 
             $error = "El correo ya está cogido";
-        }else{
+        } else {
 
-            //Aquí hago el insert
-            
-            //Da un error
-            // $statementInsert = $conn->prepare("INSERT INTO users (name,email,password) VALUES (:name,:email,:password)");
-            // $statementInsert ->bindParam(":name",$_POST["name"]);
-            // $statementInsert ->bindParam(":email",$_POST["email"]);
-            // $statementInsert ->bindParam(":password",password_hash($_POST["password"],PASSWORD_BCRYPT));
-            // $statementInsert->execute();
-
+    
             $conn
-            ->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)")
-            ->execute([
-              ":name" => $_POST["name"],
-              ":email" => $_POST["email"],
-              ":password" => password_hash($_POST["password"], PASSWORD_BCRYPT),
-            ]);
+                ->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)")
+                ->execute([
+                    ":name" => $_POST["name"],
+                    ":email" => $_POST["email"],
+                    ":password" => password_hash($_POST["password"], PASSWORD_BCRYPT),
+                ]);
 
-            //header("Location : home.php");
+            $statement = $conn->prepare("SELECT * FROM users WHERE email = :email");
+            $statement->bindParam(":email", $_POST["email"]);
+            $statement->execute();
+            $user = $statement ->fetch(PDO::FETCH_ASSOC);
+
+            //Iniciamos sesión una vez te registras
+            session_start();
+            $_SESSION["user"] = $user;
 
             header("Location: home.php");
-
-
         }
-
     }
-
 }
 
 ?>
@@ -82,16 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="./home.php">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="./add.php">Add Contact</a>
-                    </li>
-                </ul>
-            </div>
+          
         </div>
     </nav>
 

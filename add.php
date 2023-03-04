@@ -3,6 +3,15 @@
  
   require "conexion.php";
 
+  session_start();
+
+  //Si la sesión no está iniciada vuelve al login
+
+  if (!isset($_SESSION["user"])) {
+    header("Location: login.php");
+    return;
+  }
+
   $error = null;
 
   if ($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -22,12 +31,12 @@
       $phoneNumber = $_POST["phone_number"];
 
         //statement con inyección sql
-       $statement = $conn->prepare("INSERT INTO contacts(name,phone_number) VALUES (:name,:phoneNumber)");
+       $statement = $conn->prepare("INSERT INTO contacts(user_id,name,phone_number) VALUES ({$_SESSION["user"]["id"]},:name,:phoneNumber)");
        $statement ->bindParam(":name",$name);
        $statement ->bindParam(":phoneNumber",$phoneNumber);
 
        //------Hay que hacerlo con bindparams para evitar la inyección sql
-        $statement ->execute();
+      $statement ->execute();
 
 
         header("Location: home.php");
