@@ -1,81 +1,81 @@
 <?php
 
-  require "conexion.php";
+require "conexion.php";
 
-  $id = $_GET["id"];
+$id = $_GET["id"];
 
-  $statement = $conn->prepare("SELECT * FROM contacts WHERE id = :id LIMIT 1");
-  $statement->bindParam(":id",$id);
-  $statement->execute();
+$statement = $conn->prepare("SELECT * FROM contacts WHERE id = :id LIMIT 1");
+$statement->bindParam(":id", $id);
+$statement->execute();
 
-  //Forma breve de hacer lo anterior
-  //$statement->execute([":id" => $id]);
+//Forma breve de hacer lo anterior
+//$statement->execute([":id" => $id]);
 
-  if ($statement->rowCount() == 0) {
-    http_response_code(404);
-    echo("HTTP 404 NOT FOUND");
-    return;
+if ($statement->rowCount() == 0) {
+  http_response_code(404);
+  echo ("HTTP 404 NOT FOUND");
+  return;
+}
+
+//Para que no puedeas actualizar el contacto de otro usuario
+$contact = $statement->fetch(PDO::FETCH_ASSOC);
+
+if ($contact["user_id"] != $_SESSION["user"]["id"]) {
+
+  http_response_code(403);
+  echo "no estas autorizado";
+  return;
+}
+
+
+$error = null;
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  if (empty($_POST["name"]) || empty($_POST["phone_number"])) {
+    $error = "Please fill all the fields.";
+  } else if (strlen($_POST["phone_number"]) < 9) {
+    $error = "Phone number must be at least 9 characters.";
+  } else {
+    $name = $_POST["name"];
+    $phoneNumber = $_POST["phone_number"];
+
+    $statement = $conn->prepare("UPDATE contacts SET name = :name, phone_number = :phone_number WHERE id = :id");
+    $statement->bindParam(":id", $id);
+    $statement->bindParam(":name", $_POST["name"]);
+    $statement->bindParam(":phone_number", $_POST["phone_number"]);
+
+    $statement->execute();
+
+    //Otra forma vas breve de hacerlo
+    // $statement->execute([
+    //   ":id" => $id,
+    //   ":name" => $_POST["name"],
+    //   ":phone_number" => $_POST["phone_number"],
+    // ]);
+
+    header("Location: home.php");
   }
-
-  $contact = $statement->fetch(PDO::FETCH_ASSOC);
-
-  $error = null;
-
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (empty($_POST["name"]) || empty($_POST["phone_number"])) {
-      $error = "Please fill all the fields.";
-    } else if (strlen($_POST["phone_number"]) < 9) {
-      $error = "Phone number must be at least 9 characters.";
-    } else {
-      $name = $_POST["name"];
-      $phoneNumber = $_POST["phone_number"];
-
-      $statement = $conn->prepare("UPDATE contacts SET name = :name, phone_number = :phone_number WHERE id = :id");
-      $statement ->bindParam(":id",$id);
-      $statement ->bindParam(":name",$_POST["name"]);
-      $statement ->bindParam(":phone_number",$_POST["phone_number"]);
-
-      $statement ->execute();
-
-      //Otra forma vas breve de hacerlo
-      // $statement->execute([
-      //   ":id" => $id,
-      //   ":name" => $_POST["name"],
-      //   ":phone_number" => $_POST["phone_number"],
-      // ]);
-
-      header("Location: home.php");
-    }
-  }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Bootstrap -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css"
-    integrity="sha512-ZdxIsDOtKj2Xmr/av3D/uo1g15yxNFjkhrcfLooZV5fW0TT7aF7Z3wY1LOA16h0VgFLwteg14lWqlYUQK3to/w=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-  <script
-    defer
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-    crossorigin="anonymous"
-  ></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css" integrity="sha512-ZdxIsDOtKj2Xmr/av3D/uo1g15yxNFjkhrcfLooZV5fW0TT7aF7Z3wY1LOA16h0VgFLwteg14lWqlYUQK3to/w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
   <!-- Static Content -->
   <link rel="stylesheet" href="./static/css/index.css" />
 
   <title>Contacts App</title>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -83,15 +83,7 @@
         <img class="mr-2" src="./static/img/logo.png" />
         ContactsApp
       </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -114,7 +106,7 @@
           <div class="card">
             <div class="card-header">Add New Contact</div>
             <div class="card-body">
-              <?php if ($error): ?>
+              <?php if ($error) : ?>
                 <p class="text-danger">
                   <?= $error ?>
                 </p>
@@ -122,20 +114,20 @@
               <form method="POST" action="update.php?id=<?= $contact["id"] ?>">
                 <div class="mb-3 row">
                   <label for="name" class="col-md-4 col-form-label text-md-end">Name</label>
-    
+
                   <div class="col-md-6">
-                    <input  id="name" type="text" class="form-control" name="name" value="<?= $contact["name"] ?>" autocomplete="name" autofocus>
+                    <input id="name" type="text" class="form-control" name="name" value="<?= $contact["name"] ?>" autocomplete="name" autofocus>
                   </div>
                 </div>
-    
+
                 <div class="mb-3 row">
                   <label for="phone_number" class="col-md-4 col-form-label text-md-end">Phone Number</label>
-    
+
                   <div class="col-md-6">
-                    <input  id="phone_number" type="tel" class="form-control" name="phone_number" value="<?= $contact["phone_number"] ?>" autocomplete="phone_number" autofocus>
+                    <input id="phone_number" type="tel" class="form-control" name="phone_number" value="<?= $contact["phone_number"] ?>" autocomplete="phone_number" autofocus>
                   </div>
                 </div>
-    
+
                 <div class="mb-3 row">
                   <div class="col-md-6 offset-md-4">
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -149,4 +141,5 @@
     </div>
   </main>
 </body>
+
 </html>
