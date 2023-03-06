@@ -1,77 +1,67 @@
-
 <?php
- 
-  require "conexion.php";
 
-  session_start();
+require "conexion.php";
 
-  //Si la sesión no está iniciada vuelve al login
+session_start();
 
-  if (!isset($_SESSION["user"])) {
-    header("Location: login.php");
+//Si la sesión no está iniciada vuelve al login
+
+if (!isset($_SESSION["user"])) {
+  header("Location: login.php");
+  return;
+}
+
+$error = null;
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+  if (empty($_POST["name"]) || empty($_POST["phone_number"])) {
+
+    $error = "Por favor rellena todos los campos";
+  } else if (strlen($_POST["phone_number"]) < 9) {
+
+    $error = "Teléfono demasiado largo,debe ser de al menos 9 caracteres";
+  } else {
+
+    $name = $_POST["name"];
+    $phoneNumber = $_POST["phone_number"];
+
+    //statement con inyección sql
+    $statement = $conn->prepare("INSERT INTO contacts(user_id,name,phone_number) VALUES ({$_SESSION["user"]["id"]},:name,:phoneNumber)");
+    $statement->bindParam(":name", $name);
+    $statement->bindParam(":phoneNumber", $phoneNumber);
+
+    //------Hay que hacerlo con bindparams para evitar la inyección sql
+    $statement->execute();
+
+    //Mensaje que se ha añadido un contacto
+    $_SESSION["flash"] = ["message" => "Contact {$_POST['name']} added."];
+
+    header("Location: home.php");
     return;
   }
-
-  $error = null;
-
-  if ($_SERVER["REQUEST_METHOD"] == "POST"){
-
-      if (empty($_POST["name"]) || empty($_POST["phone_number"]))     {
-
-          $error = "Por favor rellena todos los campos";
-
-      }  else if (strlen($_POST["phone_number"]) < 9){
-
-          $error = "Teléfono demasiado largo,debe ser de al menos 9 caracteres";
-
-
-      }else{
-
-      $name = $_POST["name"];
-      $phoneNumber = $_POST["phone_number"];
-
-        //statement con inyección sql
-       $statement = $conn->prepare("INSERT INTO contacts(user_id,name,phone_number) VALUES ({$_SESSION["user"]["id"]},:name,:phoneNumber)");
-       $statement ->bindParam(":name",$name);
-       $statement ->bindParam(":phoneNumber",$phoneNumber);
-
-       //------Hay que hacerlo con bindparams para evitar la inyección sql
-      $statement ->execute();
-
-
-        header("Location: home.php");
-
-      }
-  }
+}
 
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Bootstrap -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css"
-    integrity="sha512-ZdxIsDOtKj2Xmr/av3D/uo1g15yxNFjkhrcfLooZV5fW0TT7aF7Z3wY1LOA16h0VgFLwteg14lWqlYUQK3to/w=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"/>
-  <script
-    defer
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-    crossorigin="anonymous"
-  ></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.1.3/darkly/bootstrap.min.css" integrity="sha512-ZdxIsDOtKj2Xmr/av3D/uo1g15yxNFjkhrcfLooZV5fW0TT7aF7Z3wY1LOA16h0VgFLwteg14lWqlYUQK3to/w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
   <!-- Static Content -->
   <link rel="stylesheet" href="./static/css/index.css" />
 
   <title>Contacts App</title>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -79,15 +69,7 @@
         <img class="mr-2" src="./static/img/logo.png" />
         ContactsApp
       </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -110,28 +92,28 @@
           <div class="card">
             <div class="card-header">Add New Contact</div>
             <div class="card-body">
-              <?php if($error): ?>
+              <?php if ($error) : ?>
                 <p class="text-danger">
-                 <?= $error ?>
-              </p>
+                  <?= $error ?>
+                </p>
               <?php endif ?>
-              <form method="POST"  action="add.php">
+              <form method="POST" action="add.php">
                 <div class="mb-3 row">
                   <label for="name" class="col-md-4 col-form-label text-md-end">Name</label>
-    
+
                   <div class="col-md-6">
                     <input id="name" type="text" class="form-control" name="name" required autocomplete="name" autofocus>
                   </div>
                 </div>
-    
+
                 <div class="mb-3 row">
                   <label for="phone_number" class="col-md-4 col-form-label text-md-end">Phone Number</label>
-    
+
                   <div class="col-md-6">
                     <input id="phone_number" type="tel" class="form-control" name="phone_number" required autocomplete="phone_number" autofocus>
                   </div>
                 </div>
-    
+
                 <div class="mb-3 row">
                   <div class="col-md-6 offset-md-4">
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -145,4 +127,5 @@
     </div>
   </main>
 </body>
+
 </html>

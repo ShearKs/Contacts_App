@@ -50,6 +50,8 @@ $contacts = $conn->query("SELECT * FROM contacts WHERE user_id = {$_SESSION['use
 
 <body>
 
+<?php require "mensajeFlash.php" ?>
+
   <main>
     <div class="container pt-4 p-3">
       <div class="row">

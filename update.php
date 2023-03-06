@@ -2,6 +2,8 @@
 
 require "conexion.php";
 
+session_start();
+
 $id = $_GET["id"];
 
 $statement = $conn->prepare("SELECT * FROM contacts WHERE id = :id LIMIT 1");
@@ -53,7 +55,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //   ":phone_number" => $_POST["phone_number"],
     // ]);
 
+    //Mensaje que se ha añadido un contacto
+    $_SESSION["flash"] = ["message" => "Contact {$_POST['name']} actualizado."];
+
     header("Location: home.php");
+
+    return;
   }
 }
 ?>

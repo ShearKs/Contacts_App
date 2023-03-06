@@ -2,6 +2,8 @@
 
 require "conexion.php";
 
+session_start();
+
 $id = $_GET["id"];
 
 
@@ -35,4 +37,8 @@ $statement = $conn->prepare("DELETE FROM contacts WHERE id = :id");
 $statement->bindParam("id", $id);
 $statement->execute();
 
+//Mensaje que se ha añadido un contacto
+$_SESSION["flash"] = ["message" => "Contact {$_POST['name']} eliminado" ,  "type" => "danger"];
+
 header("Location: home.php");
+
